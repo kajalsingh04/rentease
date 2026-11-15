@@ -4,7 +4,7 @@ import VendorRentalCard from '../../components/VendorRentalCard';
 
 const statuses = ['', 'pending', 'confirmed', 'active', 'return_requested', 'returned', 'cancelled'];
 
-export default function VendorRentals() {
+export default function VendorRentals({ title = 'Rentals of my products' }) {
   const [rentals, setRentals] = useState([]);
   const [status, setStatus] = useState('');
   const [loading, setLoading] = useState(true);
@@ -24,7 +24,7 @@ export default function VendorRentals() {
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-semibold">Rentals of my products</h2>
+        <h2 className="text-xl font-semibold">{title}</h2>
         <select value={status} onChange={(e) => setStatus(e.target.value)} className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm">
           {statuses.map((s) => (
             <option key={s} value={s}>

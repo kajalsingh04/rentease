@@ -23,6 +23,9 @@ export default function Navbar() {
               {(user.role === 'vendor' || user.role === 'admin') && (
                 <Link to="/vendor" className="hover:text-indigo-600">Dashboard</Link>
               )}
+              {user.role === 'admin' && (
+                <Link to="/admin" className="hover:text-indigo-600">Admin</Link>
+              )}
               <span className="hidden sm:inline text-gray-500">Hi, {user.name}</span>
               <button onClick={logout} className="text-red-600 hover:underline">
                 Logout

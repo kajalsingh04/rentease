@@ -13,6 +13,11 @@ import VendorProducts from './pages/vendor/VendorProducts';
 import ProductForm from './pages/vendor/ProductForm';
 import VendorRentals from './pages/vendor/VendorRentals';
 import VendorMaintenance from './pages/vendor/VendorMaintenance';
+import AdminLayout from './pages/admin/AdminLayout';
+import AdminOverview from './pages/admin/AdminOverview';
+import AdminUsers from './pages/admin/AdminUsers';
+import AdminClaims from './pages/admin/AdminClaims';
+import AdminAreas from './pages/admin/AdminAreas';
 
 export default function App() {
   return (
@@ -57,6 +62,23 @@ export default function App() {
             <Route path="products/:id/edit" element={<ProductForm />} />
             <Route path="rentals" element={<VendorRentals />} />
             <Route path="maintenance" element={<VendorMaintenance />} />
+          </Route>
+
+          {/* Admin dashboard: only for admin */}
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute roles={['admin']}>
+                <AdminLayout />
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<AdminOverview />} />
+            <Route path="users" element={<AdminUsers />} />
+            <Route path="rentals" element={<VendorRentals title="All rentals" />} />
+            <Route path="maintenance" element={<VendorMaintenance />} />
+            <Route path="claims" element={<AdminClaims />} />
+            <Route path="areas" element={<AdminAreas />} />
           </Route>
 
           <Route path="*" element={<p>Page not found</p>} />
