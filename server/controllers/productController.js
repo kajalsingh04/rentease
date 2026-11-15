@@ -49,6 +49,13 @@ export const listProducts = async (req, res) => {
     res.json({ items, total, page, pages: Math.ceil(total / limit) });
 };
 
+// Vendor: my products, including hidden ones. Admin sees all products.
+export const myProducts = async (req, res) => {
+  const filter = req.user.role === 'admin' ? {} : { vendor: req.user._id };
+  const products = await Product.find(filter).sort({ createdAt: -1 });
+  res.json(products);
+};
+
 export const getProduct = async (req, res) => {
     const product = await Product.findById(req.params.id);
     if (!product) throw new AppError('Product not found', 404);
