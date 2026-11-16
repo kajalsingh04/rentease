@@ -8,12 +8,12 @@ export default function Navbar() {
 
   return (
     <nav className="bg-white border-b border-gray-200">
-      <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div className="max-w-6xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-y-2">
         <Link to="/" className="text-xl font-bold text-indigo-600">
           RentEase
         </Link>
 
-        <div className="flex items-center gap-4 text-sm">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
           <Link to="/" className="hover:text-indigo-600">Products</Link>
           <Link to="/cart" className="hover:text-indigo-600">Cart ({items.length})</Link>
 

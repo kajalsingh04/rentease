@@ -31,5 +31,7 @@ const maintenanceSchema = new mongoose.Schema(
     },
     { timestamps: true }
 );
+maintenanceSchema.index({ vendor: 1, status: 1 });
+maintenanceSchema.index({ user: 1, createdAt: -1 });
 
 export default mongoose.model('MaintenanceRequest', maintenanceSchema);

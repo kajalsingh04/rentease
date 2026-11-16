@@ -11,7 +11,7 @@ export default function ProductCard({ product }) {
       className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-md transition"
     >
       {product.images?.[0] ? (
-        <img src={product.images[0]} alt={product.name} className="h-40 w-full object-cover" />
+        <img src={product.images[0]} alt={product.name} loading="lazy" className="h-40 w-full object-cover" />
       ) : (
         <div className="h-40 bg-indigo-50 flex items-center justify-center text-4xl text-indigo-300">
           {product.name[0]}

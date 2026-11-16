@@ -67,4 +67,8 @@ const rentalSchema = new mongoose.Schema(
     { timestamps: true }
 );
 
+// Indexes make these searches fast
+rentalSchema.index({ user: 1, createdAt: -1 });
+rentalSchema.index({ vendor: 1, status: 1 });
+
 export default mongoose.model('Rental', rentalSchema);
