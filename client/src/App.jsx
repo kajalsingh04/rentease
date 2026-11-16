@@ -18,7 +18,8 @@ const VendorMaintenance = lazy(() => import('./pages/vendor/VendorMaintenance'))
 const AdminLayout = lazy(() => import('./pages/admin/AdminLayout'));
 const AdminOverview = lazy(() => import('./pages/admin/AdminOverview'));
 const AdminUsers = lazy(() => import('./pages/admin/AdminUsers'));
-const AdminClaims = lazy(() => import('./pages/admin/AdminClaims'))
+const AdminClaims = lazy(() => import('./pages/admin/AdminClaims'));
+const AdminAreas = lazy(() => import('./pages/admin/AdminAreas'));
 export default function App() {
   return (
     <div className="min-h-screen bg-gray-50 text-gray-800">
