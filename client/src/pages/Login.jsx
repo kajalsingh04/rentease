@@ -63,7 +63,7 @@ export default function Login() {
       </form>
 
       <p className="text-sm text-gray-500 mt-4">
-        New here?{' '}
+        Don't have an account?{' '}
         <Link to="/register" className="text-indigo-600 hover:underline">
           Create an account
         </Link>

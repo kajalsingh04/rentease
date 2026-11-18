@@ -33,9 +33,8 @@ export default function Navbar() {
             </>
           ) : (
             <>
-              <Link to="/login" className="hover:text-indigo-600">Login</Link>
-              <Link to="/register" className="bg-indigo-600 text-white px-3 py-1.5 rounded-lg hover:bg-indigo-700">
-                Register
+              <Link to="/login" className="bg-indigo-600 text-white px-4 py-1.5 rounded-lg hover:bg-indigo-700">
+                Login
               </Link>
             </>
           )}
