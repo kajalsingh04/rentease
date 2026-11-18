@@ -15,7 +15,7 @@ export default function Navbar() {
 
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
           <Link to="/" className="hover:text-indigo-600">Products</Link>
-          <Link to="/cart" className="hover:text-indigo-600">Cart ({items.length})</Link>
+          <Link to="/cart" className="hover:text-indigo-600">❤️({items.length})</Link>
 
           {user ? (
             <>
