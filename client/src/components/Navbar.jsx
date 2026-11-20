@@ -21,7 +21,7 @@ export default function Navbar() {
             <>
               <Link to="/my-rentals" className="hover:text-indigo-600">My Rentals</Link>
               {(user.role === 'vendor' || user.role === 'admin') && (
-                <Link to="/vendor" className="hover:text-indigo-600">Dashboard </Link>
+                <Link to="/vendor" className="hover:text-indigo-600">Dashboard</Link>
               )}
               {user.role === 'admin' && (
                 <Link to="/admin" className="hover:text-indigo-600">Admin</Link>
