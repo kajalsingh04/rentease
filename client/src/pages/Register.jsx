@@ -56,7 +56,7 @@ export default function Register() {
 
         <button
           disabled={busy}
-          className="w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 disabled:opacity-50"
+          className="w-full bg-accent text-white py-2 rounded-lg hover:bg-accent-dark disabled:opacity-50"
         >
           {busy ? 'Please wait...' : 'Register'}
         </button>
@@ -64,7 +64,7 @@ export default function Register() {
 
       <p className="text-sm text-gray-500 mt-4">
         Already have an account?{' '}
-        <Link to="/login" className="text-indigo-600 hover:underline">
+        <Link to="/login" className="text-brand hover:underline">
           Login
         </Link>
       </p>

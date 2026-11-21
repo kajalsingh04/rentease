@@ -87,7 +87,7 @@ export default function VendorRentalCard({ rental, onChanged }) {
             disabled={busy}
             onClick={() => changeStatus({ status: a.status })}
             className={`text-sm px-3 py-1.5 rounded-lg border disabled:opacity-50 ${
-              a.danger ? 'border-red-300 text-red-600' : 'bg-indigo-600 text-white border-indigo-600'
+              a.danger ? 'border-red-300 text-red-600' : 'bg-accent text-white border-accent'
             }`}
           >
             {a.label}
@@ -95,7 +95,7 @@ export default function VendorRentalCard({ rental, onChanged }) {
         ))}
 
         {canReturn && (
-          <button onClick={() => setShowReturn(!showReturn)} className="text-sm px-3 py-1.5 rounded-lg bg-indigo-600 text-white">
+          <button onClick={() => setShowReturn(!showReturn)} className="text-sm px-3 py-1.5 rounded-lg bg-accent text-white">
             Mark returned
           </button>
         )}

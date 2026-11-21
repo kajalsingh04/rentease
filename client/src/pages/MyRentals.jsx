@@ -50,7 +50,7 @@ export default function MyRentals() {
             key={t.value}
             onClick={() => setTab(t.value)}
             className={`px-4 py-1.5 rounded-full text-sm border ${
-              tab === t.value ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white border-gray-300'
+              tab === t.value ? 'bg-accent text-white border-accent' : 'bg-white border-gray-300'
             }`}
           >
             {t.label}
@@ -63,7 +63,7 @@ export default function MyRentals() {
       {!loading && !error && shown.length === 0 && (
         <p className="text-gray-500">
           Nothing here yet.{' '}
-          <Link to="/" className="text-indigo-600 underline">
+          <Link to="/products" className="text-brand underline">
             Browse products
           </Link>
         </p>

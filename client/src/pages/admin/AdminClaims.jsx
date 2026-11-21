@@ -45,7 +45,7 @@ function ClaimCard({ rental, onChanged }) {
           <input value={note} onChange={(e) => setNote(e.target.value)} placeholder="Note" className="border border-gray-300 rounded-lg px-3 py-2 text-sm sm:col-span-2" />
           <input type="number" min="0" value={charge} onChange={(e) => setCharge(e.target.value)} required className="border border-gray-300 rounded-lg px-3 py-2 text-sm" />
           <div className="sm:col-span-3 flex gap-2">
-            <button className="bg-indigo-600 text-white text-sm px-3 py-1.5 rounded-lg">Save</button>
+            <button className="bg-accent text-white text-sm px-3 py-1.5 rounded-lg">Save</button>
             <button type="button" onClick={() => setEditing(false)} className="text-sm border border-gray-300 px-3 py-1.5 rounded-lg">
               Cancel
             </button>

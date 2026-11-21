@@ -43,7 +43,7 @@ export default function VendorProducts() {
     <div>
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-semibold">My products</h2>
-        <Link to="/vendor/products/new" className="bg-indigo-600 text-white text-sm px-4 py-2 rounded-lg hover:bg-indigo-700">
+        <Link to="/vendor/products/new" className="bg-accent text-white text-sm px-4 py-2 rounded-lg hover:bg-accent-dark">
           Add product
         </Link>
       </div>
@@ -74,7 +74,7 @@ export default function VendorProducts() {
                   <td className={`p-3 ${p.stock === 0 ? 'text-red-600 font-medium' : ''}`}>{p.stock}</td>
                   <td className="p-3">{p.isActive ? 'Visible' : 'Hidden'}</td>
                   <td className="p-3 whitespace-nowrap space-x-3">
-                    <Link to={`/vendor/products/${p._id}/edit`} className="text-indigo-600 hover:underline">
+                    <Link to={`/vendor/products/${p._id}/edit`} className="text-brand hover:underline">
                       Edit
                     </Link>
                     <button onClick={() => toggleActive(p)} className="text-gray-600 hover:underline">

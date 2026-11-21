@@ -32,66 +32,70 @@ export default function ProductDetail() {
   };
 
   return (
-    <div className="grid md:grid-cols-2 gap-8">
-      {product.images?.[0] ? (
-        <img src={product.images[0]} alt={product.name} className="rounded-xl w-full object-cover" />
-      ) : (
-        <div className="h-64 md:h-full bg-indigo-50 rounded-xl flex items-center justify-center text-7xl text-indigo-300">
-          {product.name[0]}
-        </div>
-      )}
+    <div>
+      <Link to="/products" className="text-sm text-brand hover:underline">
+        ← Back to products
+      </Link>
 
-      <div>
-        <p className="text-xs uppercase text-gray-400">{product.subCategory || product.category}</p>
-        <h1 className="text-3xl font-bold mt-1">{product.name}</h1>
-        {product.description && <p className="text-gray-600 mt-3">{product.description}</p>}
-
-        <h2 className="font-semibold mt-6 mb-2">Choose rental time</h2>
-        <div className="space-y-2">
-          {product.tenureOptions.map((o) => (
-            <label
-              key={o.months}
-              className={`flex items-center justify-between border rounded-lg px-4 py-3 cursor-pointer ${
-                selected?.months === o.months ? 'border-indigo-600 bg-indigo-50' : 'border-gray-300'
-              }`}
-            >
-              <span className="flex items-center gap-3">
-                <input
-                  type="radio"
-                  name="tenure"
-                  checked={selected?.months === o.months}
-                  onChange={() => setSelected(o)}
-                />
-                {o.months} months
-              </span>
-              <span className="font-semibold">{rupees(o.monthlyRent)} / month</span>
-            </label>
-          ))}
-        </div>
-
-        <p className="mt-4 text-sm text-gray-600">
-          Security deposit (refundable): <b>{rupees(product.securityDeposit)}</b>
-        </p>
-
-        {product.stock === 0 ? (
-          <p className="mt-6 text-red-600 font-medium">Currently out of stock</p>
+      <div className="grid md:grid-cols-2 gap-8 mt-4">
+        {product.images?.[0] ? (
+          <img src={product.images[0]} alt={product.name} className="rounded-2xl w-full object-cover" />
         ) : (
-          <button
-            onClick={handleAdd}
-            className="mt-6 w-full bg-indigo-600 text-white py-3 rounded-lg hover:bg-indigo-700"
-          >
-            Add to cart
-          </button>
+          <div className="h-64 md:h-full min-h-64 bg-brand-soft rounded-2xl flex items-center justify-center font-display text-7xl text-brand">
+            {product.name[0]}
+          </div>
         )}
 
-        {added && (
-          <p className="mt-3 text-green-600 text-sm">
-            Added to cart.{' '}
-            <Link to="/cart" className="underline">
-              Go to cart
-            </Link>
+        <div>
+          <p className="text-xs uppercase text-gray-500">{product.subCategory || product.category}</p>
+          <h1 className="text-3xl mt-1">{product.name}</h1>
+          {product.description && <p className="text-gray-600 mt-3">{product.description}</p>}
+
+          <h2 className="text-lg mt-6 mb-2">Choose rental time</h2>
+          <div className="space-y-2">
+            {product.tenureOptions.map((o) => (
+              <label
+                key={o.months}
+                className={`flex items-center justify-between border rounded-xl px-4 py-3 cursor-pointer bg-white ${
+                  selected?.months === o.months ? 'border-brand ring-1 ring-brand' : 'border-gray-300'
+                }`}
+              >
+                <span className="flex items-center gap-3">
+                  <input
+                    type="radio"
+                    name="tenure"
+                    checked={selected?.months === o.months}
+                    onChange={() => setSelected(o)}
+                    className="accent-[#0f766e]"
+                  />
+                  {o.months} months
+                </span>
+                <span className="font-semibold">{rupees(o.monthlyRent)} / month</span>
+              </label>
+            ))}
+          </div>
+
+          <p className="mt-4 text-sm text-gray-600">
+            Security deposit (refundable): <b>{rupees(product.securityDeposit)}</b>
           </p>
-        )}
+
+          {product.stock === 0 ? (
+            <p className="mt-6 text-red-600 font-medium">Currently out of stock</p>
+          ) : (
+            <button onClick={handleAdd} className="btn w-full mt-6">
+              Add to Cart
+            </button>
+          )}
+
+          {added && (
+            <p className="mt-3 text-green-700 text-sm">
+              Added to cart.{' '}
+              <Link to="/cart" className="underline">
+                Go to cart
+              </Link>
+            </p>
+          )}
+        </div>
       </div>
     </div>
   );

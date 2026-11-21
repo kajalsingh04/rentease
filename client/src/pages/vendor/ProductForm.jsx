@@ -118,7 +118,20 @@ export default function ProductForm() {
           <option value="furniture">Furniture</option>
           <option value="appliance">Appliance</option>
         </select>
-        <input name="subCategory" placeholder="Type (bed, sofa, fridge...)" value={form.subCategory} onChange={handleChange} className={inputClass} />
+        <input name="subCategory" list="subcategory-options" placeholder="Type (bed, sofa, fridge...)" value={form.subCategory} onChange={handleChange} className={inputClass} />
+        <datalist id="subcategory-options">
+          <option value="bed" />
+          <option value="sofa" />
+          <option value="mattress" />
+          <option value="wardrobe" />
+          <option value="table" />
+          <option value="chair" />
+          <option value="fridge" />
+          <option value="washing machine" />
+          <option value="tv" />
+          <option value="ac" />
+          <option value="microwave" />
+        </datalist>
       </div>
 
       <input name="imageUrl" placeholder="Image link (optional)" value={form.imageUrl} onChange={handleChange} className={inputClass} />
@@ -147,7 +160,7 @@ export default function ProductForm() {
             </div>
           ))}
         </div>
-        <button type="button" onClick={addTenure} className="text-indigo-600 text-sm mt-2 hover:underline">
+        <button type="button" onClick={addTenure} className="text-brand text-sm mt-2 hover:underline">
           + Add another plan
         </button>
       </div>
@@ -158,7 +171,7 @@ export default function ProductForm() {
       </label>
 
       <div className="flex gap-3">
-        <button disabled={busy} className="bg-indigo-600 text-white px-5 py-2 rounded-lg hover:bg-indigo-700 disabled:opacity-50">
+        <button disabled={busy} className="bg-accent text-white px-5 py-2 rounded-lg hover:bg-accent-dark disabled:opacity-50">
           {busy ? 'Saving...' : 'Save product'}
         </button>
         <button type="button" onClick={() => navigate('/vendor/products')} className="border border-gray-300 px-5 py-2 rounded-lg">

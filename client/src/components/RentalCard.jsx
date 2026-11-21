@@ -105,7 +105,7 @@ export default function RentalCard({ rental, onChanged }) {
             rows={3}
             className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
           />
-          <button disabled={busy} className="bg-indigo-600 text-white text-sm px-3 py-1.5 rounded-lg disabled:opacity-50">
+          <button disabled={busy} className="bg-accent text-white text-sm px-3 py-1.5 rounded-lg disabled:opacity-50">
             Send request
           </button>
         </form>

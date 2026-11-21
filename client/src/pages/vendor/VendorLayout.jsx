@@ -18,7 +18,7 @@ export default function VendorLayout() {
             to={t.to}
             className={({ isActive }) =>
               `px-4 py-1.5 rounded-full text-sm border ${
-                isActive ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white border-gray-300'
+                isActive ? 'bg-accent text-white border-accent' : 'bg-white border-gray-300'
               }`
             }
           >

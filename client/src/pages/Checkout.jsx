@@ -41,7 +41,7 @@ export default function Checkout() {
     return (
       <p>
         Your cart is empty.{' '}
-        <Link to="/" className="text-indigo-600 underline">
+        <Link to="/products" className="text-brand underline">
           Browse products
         </Link>
       </p>
@@ -68,7 +68,7 @@ export default function Checkout() {
           <input name="deliveryDate" type="date" min={tomorrow} value={form.deliveryDate} onChange={handleChange} required className={`${inputClass} mt-1`} />
         </label>
 
-        <button disabled={busy} className="w-full bg-indigo-600 text-white py-2.5 rounded-lg hover:bg-indigo-700 disabled:opacity-50">
+        <button disabled={busy} className="w-full bg-accent text-white py-2.5 rounded-lg hover:bg-accent-dark disabled:opacity-50">
           {busy ? 'Placing order...' : 'Place order'}
         </button>
       </form>

@@ -50,7 +50,7 @@ export default function AdminAreas() {
           minLength={2}
           className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm"
         />
-        <button className="bg-indigo-600 text-white text-sm px-4 py-2 rounded-lg">Add city</button>
+        <button className="bg-accent text-white text-sm px-4 py-2 rounded-lg">Add city</button>
       </form>
 
       {loading && <p>Loading...</p>}

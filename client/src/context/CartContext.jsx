@@ -29,15 +29,27 @@ export function CartProvider({ children }) {
         tenureMonths: option.months,
         monthlyRent: option.monthlyRent,
         securityDeposit: product.securityDeposit,
+        tenureOptions: product.tenureOptions, // so the user can change the plan in the cart
       },
     ]);
+  };
+
+  // Change the rental plan of an item in the cart
+  const changeTenure = (productId, months) => {
+    setItems((prev) =>
+      prev.map((i) => {
+        if (i.productId !== productId) return i;
+        const option = i.tenureOptions?.find((o) => o.months === Number(months));
+        return option ? { ...i, tenureMonths: option.months, monthlyRent: option.monthlyRent } : i;
+      })
+    );
   };
 
   const removeItem = (productId) => setItems((prev) => prev.filter((i) => i.productId !== productId));
   const clearCart = () => setItems([]);
 
   return (
-    <CartContext.Provider value={{ items, addItem, removeItem, clearCart }}>
+    <CartContext.Provider value={{ items, addItem, changeTenure, removeItem, clearCart }}>
       {children}
     </CartContext.Provider>
   );
