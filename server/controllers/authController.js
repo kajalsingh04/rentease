@@ -30,6 +30,12 @@ const safeUser = (u) => ({
     city: u.city,
 });
 
+const profileSchema = z.object({
+  name: z.string().trim().min(2),
+  phone: z.string().trim().optional(),
+  city: z.string().trim().optional(),
+});
+
 export const register = async (req, res) => {
     const data = registerSchema.parse(req.body);
 
@@ -54,4 +60,14 @@ export const login = async (req, res) => {
 
 export const me = async (req, res) => {
     res.json({ user: safeUser(req.user) });
+};
+
+// Logged-in user: change my name, phone and city
+export const updateMe = async (req, res) => {
+  const data = profileSchema.parse(req.body);
+
+  await User.updateOne({ _id: req.user._id }, data, { runValidators: true });
+  const user = await User.findById(req.user._id);
+
+  res.json({ user: safeUser(user) });
 };

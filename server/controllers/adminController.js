@@ -77,35 +77,114 @@ export const stats = async (req, res) => {
   const runningStatuses = ['active', 'return_requested']; // product is with the customer
   const heldStatuses = ['pending', 'confirmed', ...runningStatuses]; // product is not in stock
 
-  const [totalUsers, totalProducts, byStatus, mrrData, stockData, repeatData, resolveData] =
-    await Promise.all([
-      User.countDocuments(),
-      Product.countDocuments({ isActive: true }),
-      Rental.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }]),
-      Rental.aggregate([
-        { $match: { status: { $in: runningStatuses } } },
-        { $group: { _id: null, mrr: { $sum: '$monthlyRent' } } },
-      ]),
-      Product.aggregate([
-        { $match: { isActive: true } },
-        { $group: { _id: null, inStock: { $sum: '$stock' } } },
-      ]),
-      Rental.aggregate([
-        { $match: { status: { $ne: 'cancelled' } } },
-        { $group: { _id: '$user', orders: { $sum: 1 } } },
-        {
-          $group: {
-            _id: null,
-            customers: { $sum: 1 },
-            repeat: { $sum: { $cond: [{ $gt: ['$orders', 1] }, 1, 0] } },
-          },
+  // const [totalUsers, totalProducts, byStatus, mrrData, stockData, repeatData, resolveData] =
+  //   await Promise.all([
+  //     User.countDocuments(),
+  //     Product.countDocuments({ isActive: true }),
+  //     Rental.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }]),
+  //     Rental.aggregate([
+  //       { $match: { status: { $in: runningStatuses } } },
+  //       { $group: { _id: null, mrr: { $sum: '$monthlyRent' } } },
+  //     ]),
+  //     Product.aggregate([
+  //       { $match: { isActive: true } },
+  //       { $group: { _id: null, inStock: { $sum: '$stock' } } },
+  //     ]),
+  //     Rental.aggregate([
+  //       { $match: { status: { $ne: 'cancelled' } } },
+  //       { $group: { _id: '$user', orders: { $sum: 1 } } },
+  //       {
+  //         $group: {
+  //           _id: null,
+  //           customers: { $sum: 1 },
+  //           repeat: { $sum: { $cond: [{ $gt: ['$orders', 1] }, 1, 0] } },
+  //         },
+  //       },
+  //     ]),
+  //     MaintenanceRequest.aggregate([
+  //       { $match: { status: 'resolved', resolvedAt: { $exists: true } } },
+  //       { $group: { _id: null, avgMs: { $avg: { $subtract: ['$resolvedAt', '$createdAt'] } } } },
+  //     ]),
+  //   ]);
+
+  // Orders of the last 6 months
+  const now = new Date();
+  const since = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 5, 1));
+
+  const [
+    totalUsers,
+    totalProducts,
+    byStatus,
+    mrrData,
+    stockData,
+    repeatData,
+    resolveData,
+    totalVendors,
+    totalOrders,
+    monthlyData,
+    recentOrders,
+  ] = await Promise.all([
+    User.countDocuments(),
+    Product.countDocuments({ isActive: true }),
+    Rental.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }]),
+    Rental.aggregate([
+      { $match: { status: { $in: runningStatuses } } },
+      { $group: { _id: null, mrr: { $sum: '$monthlyRent' } } },
+    ]),
+    Product.aggregate([
+      { $match: { isActive: true } },
+      { $group: { _id: null, inStock: { $sum: '$stock' } } },
+    ]),
+    Rental.aggregate([
+      { $match: { status: { $ne: 'cancelled' } } },
+      { $group: { _id: '$user', orders: { $sum: 1 } } },
+      {
+        $group: {
+          _id: null,
+          customers: { $sum: 1 },
+          repeat: { $sum: { $cond: [{ $gt: ['$orders', 1] }, 1, 0] } },
         },
-      ]),
-      MaintenanceRequest.aggregate([
-        { $match: { status: 'resolved', resolvedAt: { $exists: true } } },
-        { $group: { _id: null, avgMs: { $avg: { $subtract: ['$resolvedAt', '$createdAt'] } } } },
-      ]),
-    ]);
+      },
+    ]),
+    MaintenanceRequest.aggregate([
+      { $match: { status: 'resolved', resolvedAt: { $exists: true } } },
+      { $group: { _id: null, avgMs: { $avg: { $subtract: ['$resolvedAt', '$createdAt'] } } } },
+    ]),
+    User.countDocuments({ role: 'vendor' }),
+    Rental.countDocuments(),
+    Rental.aggregate([
+      { $match: { createdAt: { $gte: since } } },
+      {
+        $group: {
+          _id: {
+            y: { $year: '$createdAt' },
+            m: { $month: '$createdAt' },
+          },
+          count: { $sum: 1 },
+        },
+      },
+    ]),
+    Rental.find()
+      .sort({ createdAt: -1 })
+      .limit(5)
+      .populate('product', 'name')
+      .populate('user', 'name'),
+  ]);
+
+  // Monthly orders for the last 6 months
+  const monthlyRentals = Array.from({ length: 6 }, (_, i) => {
+    const d = new Date(Date.UTC(since.getUTCFullYear(), since.getUTCMonth() + i, 1));
+
+    const found = monthlyData.find(
+      (x) => x._id.y === d.getUTCFullYear() && x._id.m === d.getUTCMonth() + 1
+    );
+
+    return {
+      label: d.toLocaleString('en-US', { month: 'short', timeZone: 'UTC' }),
+      count: found?.count ?? 0,
+    };
+  });
+
 
   // Turn [{_id:'active',count:3}, ...] into {active:3, ...}
   const rentalsByStatus = Object.fromEntries(byStatus.map((s) => [s._id, s.count]));
@@ -118,7 +197,11 @@ export const stats = async (req, res) => {
 
   res.json({
     totalUsers,
+    totalVendors,
     totalProducts,
+    totalOrders,
+    monthlyRentals,
+    recentOrders,
     rentalsByStatus,
     activeRentals: countOf(runningStatuses),
     monthlyRecurringRevenue: mrrData[0]?.mrr ?? 0,
