@@ -2,8 +2,9 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
+import Icon from './Icon';
 
-// "Hi, Name" menu for a logged-in user
+// Round user icon with a menu, for a logged-in user
 function AccountMenu() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -25,37 +26,42 @@ function AccountMenu() {
     navigate('/');
   };
 
-  const itemClass = 'block w-full text-left px-4 py-2 text-sm hover:bg-gray-50 hover:text-brand';
+  const itemClass = 'block w-full text-left px-4 py-2 text-sm text-gray-800 hover:bg-gray-50';
+  const close = () => setOpen(false);
 
   return (
     <div className="relative" ref={ref}>
       <button
         onClick={() => setOpen(!open)}
         aria-expanded={open}
-        className="flex items-center gap-1 font-medium text-[15px] hover:text-brand"
+        aria-label={`Account menu for ${user.name}`}
+        className="flex items-center gap-2 text-sm font-medium"
       >
-        Hi, {user.name.split(' ')[0]}
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-          <path d="m6 9 6 6 6-6" />
-        </svg>
+        <span className="w-9 h-9 rounded-full bg-white text-brand flex items-center justify-center">
+          <Icon name="profile" size={20} />
+        </span>
+        <span className="hidden sm:inline">{user.name.split(' ')[0]}</span>
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-2 w-44 bg-white border border-gray-200 rounded-xl shadow-lg py-1 z-20">
-          <Link to="/my-rentals" onClick={() => setOpen(false)} className={itemClass}>
+        <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-xl shadow-lg py-1 z-20">
+          <Link to="/account" onClick={close} className={itemClass}>
+            My Account
+          </Link>
+          <Link to="/account/rentals" onClick={close} className={itemClass}>
             My Rentals
           </Link>
           {user.role === 'vendor' && (
-            <Link to="/vendor" onClick={() => setOpen(false)} className={itemClass}>
-              Dashboard
+            <Link to="/vendor" onClick={close} className={itemClass}>
+              Vendor Dashboard
             </Link>
           )}
           {user.role === 'admin' && (
-            <Link to="/admin" onClick={() => setOpen(false)} className={itemClass}>
-              Admin
+            <Link to="/admin" onClick={close} className={itemClass}>
+              Admin Dashboard
             </Link>
           )}
-          <button onClick={handleLogout} className={`${itemClass} text-red-600 hover:text-red-700`}>
+          <button onClick={handleLogout} className={`${itemClass} text-red-600`}>
             Logout
           </button>
         </div>
@@ -77,40 +83,52 @@ export default function Navbar() {
     e.currentTarget.reset();
   };
 
+  const linkClass = 'hover:text-gold';
+
   return (
-    <header className="bg-white border-b border-gray-200">
-      <div className="wrap flex flex-wrap items-center gap-x-7 gap-y-3 py-3.5">
-        <Link to="/" className="font-display text-2xl font-semibold text-brand">
+    <header className="bg-brand text-white">
+      <div className="wrap flex flex-wrap items-center gap-x-8 gap-y-3 py-3">
+        <Link to="/" className="flex items-center gap-2 font-display text-2xl font-semibold">
+          <Icon name="home" size={26} className="text-gold" />
           RentEase
         </Link>
 
-        <nav className="flex gap-5 font-medium text-[15px]">
-          <Link to="/products?category=furniture" className="hover:text-brand">Furniture</Link>
-          <Link to="/products?category=appliance" className="hover:text-brand">Appliances</Link>
-          <Link to="/#how-it-works" className="hover:text-brand">How it works</Link>
+        <nav className="flex flex-wrap gap-x-6 gap-y-1 text-sm font-medium">
+          <Link to="/" className={linkClass}>Home</Link>
+          <Link to="/products?category=furniture" className={linkClass}>Furniture</Link>
+          <Link to="/products?category=appliance" className={linkClass}>Appliances</Link>
+          <Link to="/#about" className={linkClass}>About</Link>
+          <Link to="/#contact" className={linkClass}>Contact</Link>
         </nav>
 
-        <form onSubmit={handleSearch} role="search" className="order-last w-full md:order-none md:w-auto md:flex-1 md:min-w-[200px]">
+        <form
+          onSubmit={handleSearch}
+          role="search"
+          className="order-last w-full md:order-none md:w-auto md:flex-1 md:max-w-xs md:ml-auto relative"
+        >
           <label htmlFor="header-search" className="sr-only">Search products</label>
+          <Icon name="search" size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500" />
           <input
             id="header-search"
             name="q"
             type="search"
-            placeholder="Search beds, sofas, fridge..."
-            className="w-full box-border px-4 py-3 border border-gray-300 rounded-xl text-[15px] bg-white"
+            placeholder="Search products..."
+            className="w-full box-border pl-10 pr-4 py-2 rounded-full text-sm bg-white text-gray-800"
           />
         </form>
 
         <div className="flex items-center gap-5 ml-auto md:ml-0">
-          <Link to="/cart" className="font-medium text-[15px] hover:text-brand flex items-center gap-1.5">
-            Cart
+          <Link to="/cart" aria-label={`Cart, ${items.length} items`} className="relative hover:text-gold">
+            <Icon name="cart" size={24} />
             {items.length > 0 && (
-              <span className="bg-accent text-white text-xs font-semibold rounded-full px-2 py-0.5">{items.length}</span>
+              <span className="absolute -top-2 -right-2 bg-gold text-brand text-[11px] font-bold rounded-full min-w-5 h-5 px-1 flex items-center justify-center">
+                {items.length}
+              </span>
             )}
           </Link>
 
           {!loading && (user ? <AccountMenu /> : (
-            <Link to="/login" className="btn" style={{ padding: '10px 20px' }}>
+            <Link to="/login" className="btn btn-gold btn-sm">
               Login
             </Link>
           ))}

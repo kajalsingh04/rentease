@@ -1,15 +1,25 @@
 import { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router';
+import { Link, useNavigate, useParams } from 'react-router';
 import api, { getError } from '../api/axios';
+import Icon from '../components/Icon';
 import { useCart } from '../context/CartContext';
 import { rupees } from '../utils/format';
+
+const trust = [
+  { icon: 'truck', label: 'Free Delivery' },
+  { icon: 'maintenance', label: 'Free Maintenance' },
+  { icon: 'returns', label: 'Easy Returns' },
+];
 
 export default function ProductDetail() {
   const { id } = useParams();
   const { addItem } = useCart();
+  const navigate = useNavigate();
 
   const [product, setProduct] = useState(null);
   const [selected, setSelected] = useState(null); // selected tenure option
+  const [activeImage, setActiveImage] = useState(0);
+  const [tab, setTab] = useState('description');
   const [error, setError] = useState('');
   const [added, setAdded] = useState(false);
 
@@ -24,11 +34,19 @@ export default function ProductDetail() {
   }, [id]);
 
   if (error) return <p className="text-red-600">{error}</p>;
-  if (!product) return <p>Loading...</p>;
+  if (!product || !selected) return <p>Loading...</p>;
+
+  const images = product.images || [];
 
   const handleAdd = () => {
     addItem(product, selected);
     setAdded(true);
+  };
+
+  // Add to the cart and go straight to checkout
+  const handleRentNow = () => {
+    addItem(product, selected);
+    navigate('/checkout');
   };
 
   return (
@@ -37,54 +55,82 @@ export default function ProductDetail() {
         ← Back to products
       </Link>
 
-      <div className="grid md:grid-cols-2 gap-8 mt-4">
-        {product.images?.[0] ? (
-          <img src={product.images[0]} alt={product.name} className="rounded-2xl w-full object-cover" />
-        ) : (
-          <div className="h-64 md:h-full min-h-64 bg-brand-soft rounded-2xl flex items-center justify-center font-display text-7xl text-brand">
-            {product.name[0]}
-          </div>
-        )}
+      <div className="grid lg:grid-cols-2 gap-10 mt-4">
+        {/* Pictures */}
+        <div className="flex flex-col-reverse sm:flex-row gap-3">
+          {images.length > 1 && (
+            <div className="flex sm:flex-col gap-2 overflow-x-auto sm:overflow-visible">
+              {images.map((src, i) => (
+                <button
+                  key={src}
+                  onClick={() => setActiveImage(i)}
+                  aria-label={`Show picture ${i + 1}`}
+                  className={`w-16 h-16 shrink-0 rounded-lg overflow-hidden border-2 ${
+                    i === activeImage ? 'border-brand' : 'border-transparent'
+                  }`}
+                >
+                  <img src={src} alt="" className="w-full h-full object-cover" />
+                </button>
+              ))}
+            </div>
+          )}
 
+          {images.length > 0 ? (
+            <img src={images[activeImage]} alt={product.name} className="flex-1 min-w-0 rounded-2xl w-full max-h-[460px] object-cover" />
+          ) : (
+            <div className="flex-1 h-72 bg-cream-dark rounded-2xl flex items-center justify-center font-display text-7xl text-brand/60">
+              {product.name[0]}
+            </div>
+          )}
+        </div>
+
+        {/* Details */}
         <div>
-          <p className="text-xs uppercase text-gray-500">{product.subCategory || product.category}</p>
-          <h1 className="text-3xl mt-1">{product.name}</h1>
-          {product.description && <p className="text-gray-600 mt-3">{product.description}</p>}
+          <p className="text-xs uppercase tracking-wide text-gray-500">{product.subCategory || product.category}</p>
+          <h1 className="text-3xl mt-1 text-gray-900">{product.name}</h1>
 
-          <h2 className="text-lg mt-6 mb-2">Choose rental time</h2>
-          <div className="space-y-2">
+          <p className="mt-4 font-display font-semibold text-3xl text-brand">
+            {rupees(selected.monthlyRent)}
+            <span className="font-sans font-normal text-base text-gray-600"> / month</span>
+          </p>
+          <p className="text-sm text-gray-700 mt-1">
+            Security Deposit (refundable): <b>{rupees(product.securityDeposit)}</b>
+          </p>
+
+          <h2 className="text-sm font-semibold mt-6 mb-2 font-sans">Select Rental Duration:</h2>
+          <div className="flex flex-wrap gap-2">
             {product.tenureOptions.map((o) => (
-              <label
+              <button
                 key={o.months}
-                className={`flex items-center justify-between border rounded-xl px-4 py-3 cursor-pointer bg-white ${
-                  selected?.months === o.months ? 'border-brand ring-1 ring-brand' : 'border-gray-300'
+                onClick={() => setSelected(o)}
+                aria-pressed={selected.months === o.months}
+                className={`px-4 py-2 rounded-lg text-sm font-medium border ${
+                  selected.months === o.months
+                    ? 'bg-brand text-white border-brand'
+                    : 'bg-white text-brand border-gray-300 hover:border-brand'
                 }`}
               >
-                <span className="flex items-center gap-3">
-                  <input
-                    type="radio"
-                    name="tenure"
-                    checked={selected?.months === o.months}
-                    onChange={() => setSelected(o)}
-                    className="accent-[#0f766e]"
-                  />
-                  {o.months} months
-                </span>
-                <span className="font-semibold">{rupees(o.monthlyRent)} / month</span>
-              </label>
+                {o.months} Months
+              </button>
             ))}
           </div>
-
-          <p className="mt-4 text-sm text-gray-600">
-            Security deposit (refundable): <b>{rupees(product.securityDeposit)}</b>
-          </p>
 
           {product.stock === 0 ? (
             <p className="mt-6 text-red-600 font-medium">Currently out of stock</p>
           ) : (
-            <button onClick={handleAdd} className="btn w-full mt-6">
-              Add to Cart
-            </button>
+            <>
+              {product.stock <= 3 && <p className="mt-4 text-sm text-[#a8691f]">Only {product.stock} left</p>}
+              <div className="flex flex-wrap gap-3 mt-5">
+                <button onClick={handleAdd} className="btn">
+                  <Icon name="cart" size={18} />
+                  Add to Cart
+                </button>
+                <button onClick={handleRentNow} className="btn btn-gold">
+                  Rent Now
+                  <Icon name="arrow" size={18} />
+                </button>
+              </div>
+            </>
           )}
 
           {added && (
@@ -95,7 +141,68 @@ export default function ProductDetail() {
               </Link>
             </p>
           )}
+
+          <div className="flex flex-wrap gap-x-6 gap-y-2 mt-7 text-sm text-gray-700">
+            {trust.map((t) => (
+              <span key={t.label} className="flex items-center gap-2">
+                <Icon name={t.icon} size={18} className="text-brand" />
+                {t.label}
+              </span>
+            ))}
+          </div>
         </div>
+      </div>
+
+      {/* Tabs */}
+      <div className="mt-10">
+        <div className="flex gap-6 border-b border-gray-300 text-sm font-medium">
+          {[
+            ['description', 'Description'],
+            ['details', 'Rental details'],
+          ].map(([value, label]) => (
+            <button
+              key={value}
+              onClick={() => setTab(value)}
+              className={`pb-2 -mb-px border-b-2 ${
+                tab === value ? 'border-brand text-brand' : 'border-transparent text-gray-500 hover:text-brand'
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
+        {tab === 'description' && (
+          <p className="mt-4 text-gray-700 max-w-2xl">
+            {product.description || 'No description added for this product yet.'}
+          </p>
+        )}
+
+        {tab === 'details' && (
+          <div className="mt-4 card max-w-xl">
+            <table className="w-full text-sm">
+              <thead className="bg-gray-50 text-left text-gray-500">
+                <tr>
+                  <th className="p-3">Plan</th>
+                  <th className="p-3">Rent per month</th>
+                  <th className="p-3">Total rent</th>
+                </tr>
+              </thead>
+              <tbody>
+                {product.tenureOptions.map((o) => (
+                  <tr key={o.months} className="border-t border-gray-100">
+                    <td className="p-3">{o.months} months</td>
+                    <td className="p-3">{rupees(o.monthlyRent)}</td>
+                    <td className="p-3">{rupees(o.monthlyRent * o.months)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <p className="p-3 text-sm text-gray-600 border-t border-gray-100">
+              Refundable security deposit: {rupees(product.securityDeposit)}. Available units: {product.stock}.
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

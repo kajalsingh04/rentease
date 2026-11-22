@@ -10,10 +10,14 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
-import MyRentals from './pages/MyRentals';
 
-// Vendor and admin pages are loaded only when they are opened (smaller first download)
+// Dashboards are loaded only when they are opened (smaller first download)
+const AccountLayout = lazy(() => import('./pages/account/AccountLayout'));
+const AccountOverview = lazy(() => import('./pages/account/AccountOverview'));
+const AccountRentals = lazy(() => import('./pages/account/AccountRentals'));
+const AccountProfile = lazy(() => import('./pages/account/AccountProfile'));
 const VendorLayout = lazy(() => import('./pages/vendor/VendorLayout'));
+const VendorOverview = lazy(() => import('./pages/vendor/VendorOverview'));
 const VendorProducts = lazy(() => import('./pages/vendor/VendorProducts'));
 const ProductForm = lazy(() => import('./pages/vendor/ProductForm'));
 const VendorRentals = lazy(() => import('./pages/vendor/VendorRentals'));
@@ -23,6 +27,10 @@ const AdminOverview = lazy(() => import('./pages/admin/AdminOverview'));
 const AdminUsers = lazy(() => import('./pages/admin/AdminUsers'));
 const AdminClaims = lazy(() => import('./pages/admin/AdminClaims'));
 const AdminAreas = lazy(() => import('./pages/admin/AdminAreas'));
+
+// Which rentals each page of "My Account" shows
+const CURRENT = ['pending', 'confirmed', 'active', 'return_requested'];
+const HISTORY = ['returned', 'cancelled'];
 
 // Go to the top of the page when the page changes
 function ScrollToTop() {
@@ -67,14 +75,30 @@ export default function App() {
                   </ProtectedRoute>
                 }
               />
+
+              {/* Old address of My Rentals */}
+              <Route path="/my-rentals" element={<Navigate to="/account/rentals" replace />} />
+
+              {/* Customer dashboard */}
               <Route
-                path="/my-rentals"
+                path="/account"
                 element={
                   <ProtectedRoute>
-                    <MyRentals />
+                    <AccountLayout />
                   </ProtectedRoute>
                 }
-              />
+              >
+                <Route index element={<AccountOverview />} />
+                <Route path="rentals" element={<AccountRentals title="My Rentals" statuses={CURRENT} showRequests />} />
+                <Route path="history" element={<AccountRentals title="Rental History" statuses={HISTORY} />} />
+                <Route
+                  path="returns"
+                  element={
+                    <AccountRentals title="Return Requests" statuses={['return_requested']} emptyText="You have no return requests." />
+                  }
+                />
+                <Route path="profile" element={<AccountProfile />} />
+              </Route>
 
               {/* Vendor dashboard: only for vendor and admin */}
               <Route
@@ -85,11 +109,11 @@ export default function App() {
                   </ProtectedRoute>
                 }
               >
-                <Route index element={<Navigate to="products" replace />} />
+                <Route index element={<VendorOverview />} />
                 <Route path="products" element={<VendorProducts />} />
                 <Route path="products/new" element={<ProductForm />} />
                 <Route path="products/:id/edit" element={<ProductForm />} />
-                <Route path="rentals" element={<VendorRentals />} />
+                <Route path="rentals" element={<VendorRentals title="Orders of my products" />} />
                 <Route path="maintenance" element={<VendorMaintenance />} />
               </Route>
 
@@ -104,7 +128,7 @@ export default function App() {
               >
                 <Route index element={<AdminOverview />} />
                 <Route path="users" element={<AdminUsers />} />
-                <Route path="rentals" element={<VendorRentals title="All rentals" />} />
+                <Route path="rentals" element={<VendorRentals title="All orders" />} />
                 <Route path="maintenance" element={<VendorMaintenance />} />
                 <Route path="claims" element={<AdminClaims />} />
                 <Route path="areas" element={<AdminAreas />} />

@@ -28,7 +28,7 @@ export default function Checkout() {
         deliveryAddress: { line1: form.line1, city: form.city, pincode: form.pincode },
         deliveryDate: form.deliveryDate,
       });
-      navigate('/my-rentals', { state: { ordered: true } });
+      navigate('/account/rentals', { state: { ordered: true } });
       clearCart();
     } catch (err) {
       setError(getError(err));

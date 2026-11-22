@@ -7,7 +7,7 @@ const emptyForm = {
   description: '',
   category: 'furniture',
   subCategory: '',
-  imageUrl: '',
+  imageLinks: '',
   securityDeposit: '',
   stock: '',
   isActive: true,
@@ -37,7 +37,7 @@ export default function ProductForm() {
           description: p.description || '',
           category: p.category,
           subCategory: p.subCategory || '',
-          imageUrl: p.images?.[0] || '',
+          imageLinks: (p.images || []).join('\n'),
           securityDeposit: p.securityDeposit,
           stock: p.stock,
           isActive: p.isActive,
@@ -79,7 +79,7 @@ export default function ProductForm() {
       description: form.description,
       category: form.category,
       subCategory: form.subCategory,
-      images: form.imageUrl ? [form.imageUrl] : [],
+      images: form.imageLinks.split('\n').map((s) => s.trim()).filter(Boolean),
       securityDeposit: Number(form.securityDeposit),
       stock: Number(form.stock),
       isActive: form.isActive,
@@ -134,8 +134,7 @@ export default function ProductForm() {
         </datalist>
       </div>
 
-      <input name="imageUrl" placeholder="Image link (optional)" value={form.imageUrl} onChange={handleChange} className={inputClass} />
-
+      <textarea name="imageLinks" placeholder="Image links, one on each line (optional)" value={form.imageLinks} onChange={handleChange} rows={3} className={inputClass} />
       <div className="grid grid-cols-2 gap-3">
         <label className="text-sm text-gray-600">
           Security deposit (₹)

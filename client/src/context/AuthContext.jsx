@@ -40,9 +40,11 @@ export function AuthProvider({ children }) {
     localStorage.removeItem('token');
     setUser(null);
   };
-
+ 
+    // Use it after the profile is changed, so the new name shows everywhere
+  const updateUser = (newUser) => setUser(newUser);
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, updateUser  }}>
       {children}
     </AuthContext.Provider>
   );
