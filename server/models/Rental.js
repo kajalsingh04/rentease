@@ -53,7 +53,7 @@ const rentalSchema = new mongoose.Schema(
 
         status: {
             type: String,
-            enum: ['pending', 'confirmed','active', 'return_requested', 'returned', 'cancelled'],
+            enum: ['pending', 'confirmed', 'active', 'return_requested', 'returned', 'cancelled'],
             default: 'pending',
         },
 
@@ -62,6 +62,16 @@ const rentalSchema = new mongoose.Schema(
         damageCharge: {
             type: Number,
             default: 0
+        },
+        // Payment. Only "pay on delivery" works now. Online payment can be added later.
+        paymentMethod: { type: String, enum: ['pay_on_delivery', 'online'], default: 'pay_on_delivery' },
+        paymentStatus: { type: String, enum: ['pending', 'paid', 'refunded'], default: 'pending' },
+
+        // The customer can ask to keep the product for more months
+        extension: {
+            months: Number,
+            status: { type: String, enum: ['pending', 'approved', 'rejected'] },
+            requestedAt: Date,
         },
     },
     { timestamps: true }
