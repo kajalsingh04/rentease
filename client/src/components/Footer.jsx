@@ -2,7 +2,7 @@ import { Link } from 'react-router';
 import Icon from './Icon';
 
 // Change this to your real email
-const CONTACT_EMAIL = 'support@yourdomain.com';
+const CONTACT_EMAIL = 'support@yourdomainofrentease.com';
 
 export default function Footer() {
   return (
