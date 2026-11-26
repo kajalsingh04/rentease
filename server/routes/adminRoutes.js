@@ -5,6 +5,7 @@ import {
   damageClaims,
   updateDamage,
   stats,
+  rentalsReport,
 } from '../controllers/adminController.js';
 import { protect, authorize } from '../middleware/auth.js';
 
@@ -16,6 +17,7 @@ router.use(protect, authorize('admin'));
 router.get('/users', listUsers);
 router.patch('/users/:id/role', changeRole);
 router.get('/stats', stats);
+router.get('/reports/rentals', rentalsReport);
 router.get('/damage-claims', damageClaims);
 router.patch('/rentals/:id/damage', updateDamage);
 

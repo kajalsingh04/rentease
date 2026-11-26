@@ -32,6 +32,15 @@ const userSchema = new mongoose.Schema(
             type: String,
             trim: true
         },
+        // Only for vendors
+        businessName: {
+            type: String,
+            trim: true
+        },
+        servicesOffered: {
+            type: String,
+            trim: true
+        },
     },
     { timestamps: true }
 );

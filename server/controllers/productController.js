@@ -57,7 +57,7 @@ export const myProducts = async (req, res) => {
 };
 
 export const getProduct = async (req, res) => {
-    const product = await Product.findById(req.params.id);
+    const product = await Product.findById(req.params.id).populate('vendor', 'name businessName servicesOffered');;
     if (!product) throw new AppError('Product not found', 404);
     res.json(product);
 };

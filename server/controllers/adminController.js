@@ -77,36 +77,6 @@ export const stats = async (req, res) => {
   const runningStatuses = ['active', 'return_requested']; // product is with the customer
   const heldStatuses = ['pending', 'confirmed', ...runningStatuses]; // product is not in stock
 
-  // const [totalUsers, totalProducts, byStatus, mrrData, stockData, repeatData, resolveData] =
-  //   await Promise.all([
-  //     User.countDocuments(),
-  //     Product.countDocuments({ isActive: true }),
-  //     Rental.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }]),
-  //     Rental.aggregate([
-  //       { $match: { status: { $in: runningStatuses } } },
-  //       { $group: { _id: null, mrr: { $sum: '$monthlyRent' } } },
-  //     ]),
-  //     Product.aggregate([
-  //       { $match: { isActive: true } },
-  //       { $group: { _id: null, inStock: { $sum: '$stock' } } },
-  //     ]),
-  //     Rental.aggregate([
-  //       { $match: { status: { $ne: 'cancelled' } } },
-  //       { $group: { _id: '$user', orders: { $sum: 1 } } },
-  //       {
-  //         $group: {
-  //           _id: null,
-  //           customers: { $sum: 1 },
-  //           repeat: { $sum: { $cond: [{ $gt: ['$orders', 1] }, 1, 0] } },
-  //         },
-  //       },
-  //     ]),
-  //     MaintenanceRequest.aggregate([
-  //       { $match: { status: 'resolved', resolvedAt: { $exists: true } } },
-  //       { $group: { _id: null, avgMs: { $avg: { $subtract: ['$resolvedAt', '$createdAt'] } } } },
-  //     ]),
-  //   ]);
-
   // Orders of the last 6 months
   const now = new Date();
   const since = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 5, 1));
@@ -209,4 +179,46 @@ export const stats = async (req, res) => {
     customerRetentionPercent: customers ? round1((repeat / customers) * 100) : 0,
     avgMaintenanceResolutionHours: resolveData[0] ? round1(resolveData[0].avgMs / 36e5) : null,
   });
+};
+
+// One cell of a CSV file. A text that starts with = + - or @ could run as a formula in Excel,
+// so we put a ' in front of it. Texts with a comma, a quote or a new line are put inside quotes.
+const csvCell = (value) => {
+  let text = '';
+  if (value instanceof Date) text = value.toISOString().slice(0, 10);
+  else if (value !== undefined && value !== null) text = String(value);
+
+  if (/^[=+\-@\t\r]/.test(text)) text = `'${text}`;
+  return /[",\n\r]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+};
+
+// Report of all orders as a CSV file. Optional filter: ?status=active
+export const rentalsReport = async (req, res) => {
+  const filter = {};
+  if (req.query.status) filter.status = String(req.query.status);
+
+  const rentals = await Rental.find(filter)
+    .sort({ createdAt: -1 })
+    .limit(5000)
+    .populate('product', 'name')
+    .populate('user', 'name email')
+    .populate('vendor', 'name businessName');
+
+  const header = [
+    'Order id', 'Order date', 'Customer', 'Customer email', 'Product', 'Vendor', 'City', 'Months',
+    'Rent per month', 'Security deposit', 'Status', 'Payment status', 'Delivery date', 'Start date',
+    'End date', 'Pickup date', 'Damage charge',
+  ];
+
+  const rows = rentals.map((r) => [
+    r._id, r.createdAt, r.user?.name, r.user?.email, r.product?.name, r.vendor?.businessName || r.vendor?.name,
+    r.deliveryAddress?.city, r.tenureMonths, r.monthlyRent, r.securityDeposit, r.status, r.paymentStatus,
+    r.deliveryDate, r.startDate, r.endDate, r.pickupDate, r.damageCharge,
+  ]);
+
+  const csv = [header, ...rows].map((row) => row.map(csvCell).join(',')).join('\r\n');
+
+  res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+  res.setHeader('Content-Disposition', `attachment; filename="rentease-orders-${new Date().toISOString().slice(0, 10)}.csv"`);
+  res.send('\uFEFF' + csv); // the first character helps Excel to read the file as UTF-8
 };

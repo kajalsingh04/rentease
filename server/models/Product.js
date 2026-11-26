@@ -37,9 +37,9 @@ const productSchema = new mongoose.Schema(
             trim: true,
             lowercase: true
         }, // bed, sofa, fridge, tv...
-        brand: { 
-            type: String, 
-            trim: true 
+        brand: {
+            type: String,
+            trim: true
         },
         images: [String],
         tenureOptions: {
@@ -64,6 +64,15 @@ const productSchema = new mongoose.Schema(
         isActive: {
             type: Boolean,
             default: true
+        },
+        // Filled by the reviews code. The vendor cannot set them.
+        ratingAverage: {
+            type: Number,
+            default: 0
+        },
+        ratingCount: {
+            type: Number,
+            default: 0
         },
     },
     { timestamps: true }

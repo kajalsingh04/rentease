@@ -3,6 +3,7 @@ import Product from '../models/Product.js';
 import Rental from '../models/Rental.js';
 import ServiceArea from '../models/ServiceArea.js';
 import AppError from '../utils/AppError.js';
+import Review from '../models/Review.js';
 
 const objectId = z.string().regex(/^[0-9a-fA-F]{24}$/, 'Invalid id');
 
@@ -139,7 +140,11 @@ export const myRentals = async (req, res) => {
     .populate('product', 'name images category')
     .sort({ createdAt: -1 });
 
-  res.json(rentals);
+  // Add my rating to each rental, so the page shows "Rate this product" only once
+  const reviews = await Review.find({ rental: { $in: rentals.map((r) => r._id) } }).select('rental rating comment');
+  const reviewOf = new Map(reviews.map((r) => [String(r.rental), { rating: r.rating, comment: r.comment }]));
+
+  res.json(rentals.map((r) => ({ ...r.toObject(), review: reviewOf.get(String(r._id)) || null })));
 };
 
 // Vendor: rentals of my products. Admin: all rentals
