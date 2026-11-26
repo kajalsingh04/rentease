@@ -1,16 +1,19 @@
 import { useState } from 'react';
 import api, { getError } from '../api/axios';
 import { depositSummary, formatDate, paymentLabel, rupees, tomorrowISO } from '../utils/format';
+import Stars from './Stars';
 import StatusBadge from './StatusBadge';
 
 export default function RentalCard({ rental, onChanged }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
-  const [panel, setPanel] = useState(''); // the small form that is open: 'return', 'extend' or 'problem'
+  const [panel, setPanel] = useState(''); // the small form that is open: 'return', 'extend', 'problem' or 'review'
   const [pickupDate, setPickupDate] = useState('');
   const [months, setMonths] = useState(3);
   const [issue, setIssue] = useState('');
+  const [rating, setRating] = useState(0);
+  const [comment, setComment] = useState('');
 
   // Run an API call. If it works, show a message, close the small form and refresh the list.
   const run = async (callApi, successMessage) => {
@@ -55,8 +58,14 @@ export default function RentalCard({ rental, onChanged }) {
     if (sent) setIssue('');
   };
 
+  const sendReview = (e) => {
+    e.preventDefault();
+    run(() => api.post('/reviews', { rentalId: rental._id, rating, comment: comment.trim() || undefined }), 'Thank you for your rating');
+  };
+
   const extension = rental.extension?.status ? rental.extension : null;
   const deposit = depositSummary(rental);
+  const canRate = ['active', 'return_requested', 'returned'].includes(rental.status) && !rental.review;
   const inputClass = 'border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white';
 
   return (
@@ -113,6 +122,11 @@ export default function RentalCard({ rental, onChanged }) {
             {deposit.extra > 0 && <span className="text-red-600"> &middot; You must pay {rupees(deposit.extra)} more for the damage</span>}
           </p>
         )}
+        {rental.review && (
+          <p className="flex items-center gap-2">
+            Your rating: <Stars value={rental.review.rating} size={14} />
+          </p>
+        )}
       </div>
 
       {error && <p className="text-sm text-red-600 mt-2">{error}</p>}
@@ -137,6 +151,11 @@ export default function RentalCard({ rental, onChanged }) {
         {['active', 'return_requested'].includes(rental.status) && (
           <button onClick={() => togglePanel('problem')} className="text-sm border border-gray-300 px-3 py-1.5 rounded-lg">
             Report a problem
+          </button>
+        )}
+        {canRate && (
+          <button onClick={() => togglePanel('review')} className="text-sm border border-gray-300 px-3 py-1.5 rounded-lg">
+            Rate this product
           </button>
         )}
       </div>
@@ -187,6 +206,36 @@ export default function RentalCard({ rental, onChanged }) {
           />
           <button disabled={busy} className="btn btn-sm">
             Send request
+          </button>
+        </form>
+      )}
+
+      {panel === 'review' && (
+        <form onSubmit={sendReview} className="mt-3 space-y-2">
+          <div className="flex items-center gap-1" role="group" aria-label="Your rating">
+            {[1, 2, 3, 4, 5].map((n) => (
+              <button
+                type="button"
+                key={n}
+                onClick={() => setRating(n)}
+                aria-label={`${n} ${n === 1 ? 'star' : 'stars'}`}
+                aria-pressed={rating === n}
+                className={`text-3xl leading-none ${n <= rating ? 'text-gold' : 'text-gray-300'}`}
+              >
+                ★
+              </button>
+            ))}
+          </div>
+          <textarea
+            value={comment}
+            onChange={(e) => setComment(e.target.value)}
+            placeholder="Write a few words about the product (optional)"
+            maxLength={500}
+            rows={3}
+            className={`${inputClass} w-full`}
+          />
+          <button disabled={busy || rating === 0} className="btn btn-sm">
+            Send rating
           </button>
         </form>
       )}

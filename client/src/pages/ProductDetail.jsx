@@ -2,8 +2,10 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
 import api, { getError } from '../api/axios';
 import Icon from '../components/Icon';
+import Stars from '../components/Stars';
+import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
-import { rupees } from '../utils/format';
+import { formatDate, rupees } from '../utils/format';
 
 const trust = [
   { icon: 'truck', label: 'Free Delivery' },
@@ -14,29 +16,36 @@ const trust = [
 export default function ProductDetail() {
   const { id } = useParams();
   const { addItem } = useCart();
+  const { user } = useAuth();
   const navigate = useNavigate();
 
   const [product, setProduct] = useState(null);
-  const [selected, setSelected] = useState(null); // selected tenure option
+  const [reviews, setReviews] = useState([]);
+  const [selectedMonths, setSelectedMonths] = useState(null); // the rental period that the customer picked
   const [activeImage, setActiveImage] = useState(0);
   const [tab, setTab] = useState('description');
   const [error, setError] = useState('');
+  const [reviewError, setReviewError] = useState('');
   const [added, setAdded] = useState(false);
+  const [refresh, setRefresh] = useState(0); // change this number to load the data again
 
   useEffect(() => {
     api
       .get(`/products/${id}`)
-      .then((res) => {
-        setProduct(res.data);
-        setSelected(res.data.tenureOptions[0]);
-      })
+      .then((res) => setProduct(res.data))
       .catch((err) => setError(getError(err)));
-  }, [id]);
+    api
+      .get(`/reviews/product/${id}`)
+      .then((res) => setReviews(res.data))
+      .catch(() => setReviews([]));
+  }, [id, refresh]);
 
   if (error) return <p className="text-red-600">{error}</p>;
-  if (!product || !selected) return <p>Loading...</p>;
+  if (!product) return <p>Loading...</p>;
 
+  const selected = product.tenureOptions.find((o) => o.months === selectedMonths) || product.tenureOptions[0];
   const images = product.images || [];
+  const sellerName = product.vendor?.businessName || product.vendor?.name;
 
   const handleAdd = () => {
     addItem(product, selected);
@@ -48,6 +57,23 @@ export default function ProductDetail() {
     addItem(product, selected);
     navigate('/checkout');
   };
+
+  const deleteReview = async (reviewId) => {
+    if (!window.confirm('Delete this review?')) return;
+    setReviewError('');
+    try {
+      await api.delete(`/reviews/${reviewId}`);
+      setRefresh((n) => n + 1);
+    } catch (err) {
+      setReviewError(getError(err));
+    }
+  };
+
+  const tabs = [
+    ['description', 'Description'],
+    ['details', 'Rental details'],
+    ['reviews', `Reviews (${product.ratingCount || 0})`],
+  ];
 
   return (
     <div>
@@ -76,7 +102,7 @@ export default function ProductDetail() {
           )}
 
           {images.length > 0 ? (
-            <img src={images[activeImage]} alt={product.name} className="flex-1 min-w-0 rounded-2xl w-full max-h-[460px] object-cover" />
+            <img src={images[activeImage] || images[0]} alt={product.name} className="flex-1 min-w-0 rounded-2xl w-full max-h-[460px] object-cover" />
           ) : (
             <div className="flex-1 h-72 bg-cream-dark rounded-2xl flex items-center justify-center font-display text-7xl text-brand/60">
               {product.name[0]}
@@ -88,6 +114,25 @@ export default function ProductDetail() {
         <div>
           <p className="text-xs uppercase tracking-wide text-gray-500">{product.subCategory || product.category}</p>
           <h1 className="text-3xl mt-1 text-gray-900">{product.name}</h1>
+          {sellerName && (
+            <p className="text-sm text-gray-600 mt-1">
+              Sold by <b>{sellerName}</b>
+            </p>
+          )}
+
+          <p className="flex items-center gap-2 mt-2 text-sm text-gray-600">
+            {product.ratingCount > 0 ? (
+              <>
+                <Stars value={product.ratingAverage} />
+                <b>{product.ratingAverage}</b>
+                <button onClick={() => setTab('reviews')} className="underline">
+                  ({product.ratingCount} {product.ratingCount === 1 ? 'review' : 'reviews'})
+                </button>
+              </>
+            ) : (
+              'No reviews yet'
+            )}
+          </p>
 
           <p className="mt-4 font-display font-semibold text-3xl text-brand">
             {rupees(selected.monthlyRent)}
@@ -102,7 +147,7 @@ export default function ProductDetail() {
             {product.tenureOptions.map((o) => (
               <button
                 key={o.months}
-                onClick={() => setSelected(o)}
+                onClick={() => setSelectedMonths(o.months)}
                 aria-pressed={selected.months === o.months}
                 className={`px-4 py-2 rounded-lg text-sm font-medium border ${
                   selected.months === o.months
@@ -156,10 +201,7 @@ export default function ProductDetail() {
       {/* Tabs */}
       <div className="mt-10">
         <div className="flex gap-6 border-b border-gray-300 text-sm font-medium">
-          {[
-            ['description', 'Description'],
-            ['details', 'Rental details'],
-          ].map(([value, label]) => (
+          {tabs.map(([value, label]) => (
             <button
               key={value}
               onClick={() => setTab(value)}
@@ -201,6 +243,38 @@ export default function ProductDetail() {
             <p className="p-3 text-sm text-gray-600 border-t border-gray-100">
               Refundable security deposit: {rupees(product.securityDeposit)}. Available units: {product.stock}.
             </p>
+            {product.vendor?.servicesOffered && (
+              <p className="p-3 text-sm text-gray-600 border-t border-gray-100">
+                About the vendor: {product.vendor.servicesOffered}
+              </p>
+            )}
+          </div>
+        )}
+
+        {tab === 'reviews' && (
+          <div className="mt-4 max-w-2xl space-y-3">
+            {reviewError && <p className="text-sm text-red-600">{reviewError}</p>}
+            {reviews.length === 0 && (
+              <p className="text-gray-500">No reviews yet. After you rent this product, you can rate it in My Rentals.</p>
+            )}
+
+            {reviews.map((r) => (
+              <div key={r._id} className="card p-4">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <Stars value={r.rating} size={14} />
+                    <span className="text-sm font-medium">{r.name}</span>
+                  </div>
+                  <span className="text-xs text-gray-400">{formatDate(r.createdAt)}</span>
+                </div>
+                {r.comment && <p className="text-sm text-gray-700 mt-2">{r.comment}</p>}
+                {user && (user.role === 'admin' || user.id === r.userId) && (
+                  <button onClick={() => deleteReview(r._id)} className="text-xs text-red-600 hover:underline mt-2">
+                    Delete
+                  </button>
+                )}
+              </div>
+            ))}
           </div>
         )}
       </div>

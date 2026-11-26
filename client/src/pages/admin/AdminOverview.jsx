@@ -5,6 +5,7 @@ import StatCard from '../../components/StatCard';
 import StatusBadge from '../../components/StatusBadge';
 import { useAuth } from '../../context/AuthContext';
 import { formatDate, rupees } from '../../utils/format';
+import DownloadReportButton from '../../components/DownloadReportButton';
 
 export default function AdminOverview() {
   const { user } = useAuth();
@@ -38,6 +39,7 @@ export default function AdminOverview() {
     <div>
       <div className="flex flex-wrap items-center justify-between gap-2 mb-5">
         <h1 className="text-2xl">Admin Dashboard</h1>
+        <DownloadReportButton />
         <p className="text-sm text-gray-600">Hello, {user.name}</p>
       </div>
 

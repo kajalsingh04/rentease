@@ -3,6 +3,7 @@ import { Link } from 'react-router';
 import { useCart } from '../context/CartContext';
 import { rupees } from '../utils/format';
 import Icon from './Icon';
+import Stars from './Stars';
 
 export default function ProductCard({ product }) {
   const { addItem } = useCart();
@@ -35,6 +36,13 @@ export default function ProductCard({ product }) {
           <h3 className="text-base hover:text-leaf">{product.name}</h3>
         </Link>
         <p className="text-xs text-gray-500 capitalize mt-0.5">{product.subCategory || product.category}</p>
+
+        {product.ratingCount > 0 && (
+          <p className="flex items-center gap-1.5 text-xs text-gray-600 mt-1">
+            <Stars value={product.ratingAverage} size={14} />
+            {product.ratingAverage} ({product.ratingCount})
+          </p>
+        )}
 
         <p className="mt-2 font-display font-semibold text-xl text-brand">
           {rupees(plan.monthlyRent)}
