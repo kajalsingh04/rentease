@@ -5,7 +5,7 @@ import Icon from '../components/Icon';
 import ProductCard from '../components/ProductCard';
 
 // To use your own photo: put it in the "public" folder and write its name here, like '/hero.jpg'
-const HERO_PHOTO = '';
+const HERO_PHOTO = '../herobanner.jpg';
 
 // The "type" must match the Type that the vendor writes when adding a product
 const categories = [
